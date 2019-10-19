@@ -1,0 +1,60 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <title></title>
+  <script type="text/javascript">
+    var dealerCard = '';
+    var playerCards = [];
+
+    var suits = ['diamonds', 'spades', 'hearts', 'clubs'];
+    var ordinals = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'jack', 'queen', 'king', 'ace'];
+
+    function randMinMax(min, max) {
+      return Math.floor(Math.random() * (max - min) + min);
+    }
+
+    function deal() {
+      console.log('dealing!');
+
+      for (let i = 1; i !== 4; ++i) {
+        const sindex = randMinMax(0, suits.length - 1);
+        const oindex = randMinMax(0, ordinals.length - 1);
+        dealerCard = `cards/${ordinals[oindex]}_of_${suits[sindex]}.svg`;
+        document.getElementById('img' + i).setAttribute('src', dealerCard);
+      }
+    }
+
+    function hit() {
+      console.log('hitting!');
+    }
+
+    function double() {
+      console.log('double!');
+    }
+
+    function stand() {
+      console.log('stand!');
+    }
+  </script>
+</head>
+<body contextmenu="divmenu">
+  <div id="dealer_cards">
+    <img id="img1" src="cards/10_of_clubs.svg" />
+  </div>
+  <h1>dealer cards</h1>
+
+  <h1>your cards</h1>
+  <div id="your_cards">
+    <img id="img2" src="cards/3_of_clubs.svg" />
+    <img id="img3" src="cards/9_of_clubs.svg" />
+  </div>
+  <button onclick="deal()" accesskey="1">de<u>a</u>l!</button>
+  <button onclick="hit()" accesskey="2"><u>h</u>it!</button>
+  <button onclick="double()" accesskey="3">d<u>o</u>uble!</button>
+  <button onclick="stand()" accesskey="4"><u>s</u>tand!</button>
+
+  <h1></h1>
+</body>
+</html>
