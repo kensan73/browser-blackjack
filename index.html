@@ -79,7 +79,7 @@
     }
 
     function getCorrectMoveSoftHand(dealercard, playercard1, playercard2) {
-      if (isAce(playercard1)) {
+      if (!isAce(playercard1)) {
         let temp = playercard1;
         playercard1 = playercard2;
         playercard2 = temp;
