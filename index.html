@@ -4,57 +4,354 @@
 <head>
   <meta charset="utf-8" />
   <title></title>
+  <link rel="stylesheet" href="./css/bootstrap.min.css">
+<!--  <script type="text/javascript" src="./js/bootstrap.min.js" />-->
   <script type="text/javascript">
-    var dealerCard = '';
-    var playerCards = [];
+    let dealerCard = '';
+    let playerCards = [];
 
-    var suits = ['diamonds', 'spades', 'hearts', 'clubs'];
-    var ordinals = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'jack', 'queen', 'king', 'ace'];
+    let suits = ['diamonds', 'spades', 'hearts', 'clubs'];
+    let ordinals = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'jack', 'queen', 'king', 'ace'];
 
     function randMinMax(min, max) {
       return Math.floor(Math.random() * (max - min) + min);
     }
 
+    function clearFeedback() {
+      document.getElementById('feedback').innerHTML = '';
+    }
+
     function deal() {
       console.log('dealing!');
+      clearFeedback();
 
       for (let i = 1; i !== 4; ++i) {
-        const sindex = randMinMax(0, suits.length - 1);
-        const oindex = randMinMax(0, ordinals.length - 1);
+        const sindex = randMinMax(0, suits.length);
+        const oindex = randMinMax(0, ordinals.length);
         dealerCard = `cards/${ordinals[oindex]}_of_${suits[sindex]}.svg`;
         document.getElementById('img' + i).setAttribute('src', dealerCard);
       }
+
+      let cards = getCards();
+
+      if ((cardValHard(cards[1]) === 10 && cardValHard(cards[2]) === 11)
+              || (cardValHard(cards[2]) === 10 && cardValHard(cards[1]) === 11))
+      {
+        let feedback = 'blackjack!';
+        document.getElementById('feedback').innerHTML = feedback;
+        setTimeout(() => deal(), 3000);
+      }
+    }
+
+    function getCardValueById(id) {
+      let regexCard = /cards\/(.*)_of_.*/
+      return document.getElementById(id).getAttribute('src').match(regexCard)[1];
+    }
+
+    function getCards() {
+      let dealercard = getCardValueById('img1')
+      let playercard1 = getCardValueById('img2')
+      let playercard2 = getCardValueById('img3')
+
+      return [dealercard, playercard1, playercard2];
+    }
+
+    function isFace(card) {
+      return card[0] === 'j' || card[0] === 'q' || card[0] === 'k';
+    }
+
+    function isAce(card) {
+      return card[0] === 'a';
+    }
+
+    function cardValHard(card) {
+      if (isFace(card))
+        return 10;
+
+      if (isAce(card))
+        return 11;
+
+      return card - '0';
+    }
+
+    function cardsSumHard(card1, card2) {
+      return cardValHard(card1) + cardValHard(card2);
+    }
+
+    function getCorrectMoveSoftHand(dealercard, playercard1, playercard2) {
+      if (isAce(playercard1)) {
+        let temp = playercard1;
+        playercard1 = playercard2;
+        playercard2 = temp;
+      }
+
+      let dealercardvalue = cardValHard(dealercard);
+      let playercard2value = cardValHard(playercard2);
+      if (playercard2value === 9)
+        return 'stand';
+
+      if (playercard2value === 8) {
+        if (dealercardvalue === '6')
+          return 'double';
+        return 'stand';
+      }
+
+      if (playercard2value === 7) {
+        if (dealercardvalue >= 2 && dealercardvalue <= 6)
+          return 'double';
+        else if (dealercardvalue >= 9 && dealercardvalue <= 11)
+          return 'hit'
+        return 'stand';
+      }
+
+      if (playercard2value === 6) {
+        if (dealercardvalue >= 3 && dealercardvalue <= 6)
+          return 'double';
+        return 'hit'
+      }
+
+      if (playercard2value === 5) {
+        if (dealercardvalue >= 4 && dealercardvalue <= 6)
+          return 'double';
+        return 'hit'
+      }
+
+      if (playercard2value === 4) {
+        if (dealercardvalue >= 4 && dealercardvalue <= 6)
+          return 'double';
+        return 'hit'
+      }
+
+      if (dealercardvalue >= 5 && dealercardvalue <= 6)
+        return 'double';
+      return 'hit'
+    }
+
+    function getCorrectMoveHardHand(dealercard, playercard1, playercard2) {
+      let playersum = cardsSumHard(playercard1, playercard2);
+
+      if (playersum >= 17)
+        return 'stand';
+
+      if (playersum === 16) {
+        if (cardValHard(dealercard) >= 2 && cardValHard(dealercard) <= 6)
+          return 'stand';
+        return 'hit';
+      }
+
+      if (playersum === 15) {
+        if (cardValHard(dealercard) >= 2 && cardValHard(dealercard) <= 6)
+          return 'stand';
+        return 'hit';
+      }
+
+      if (playersum === 14) {
+        if (cardValHard(dealercard) >= 2 && cardValHard(dealercard) <= 6)
+          return 'stand';
+        return 'hit';
+      }
+
+      if (playersum === 13) {
+        if (cardValHard(dealercard) >= 2 && cardValHard(dealercard) <= 6)
+          return 'stand';
+        return 'hit';
+      }
+
+      if (playersum === 12) {
+        if (cardValHard(dealercard) >= 4 && cardValHard(dealercard) <= 6)
+          return 'stand';
+        return 'hit';
+      }
+
+      if (playersum === 11)
+        return 'double';
+
+      if (playersum === 10) {
+        if (cardValHard(dealercard) >= 2 && cardValHard(dealercard) <= 9)
+          return 'double';
+
+        return 'hit';
+      }
+
+      if (playersum === 9) {
+        if (cardValHard(dealercard) >= 3 && cardValHard(dealercard) <= 6)
+          return 'double';
+
+        return 'hit';
+      }
+
+      if (playersum === 8)
+        return 'hit';
+
+      return 'hit';
+    }
+
+    function getCorrectMoveSplitPair(dealercard, playercard1) {
+      let playercard1val = cardValHard(playercard1);
+      let dealercardval = cardValHard(dealercard);
+
+      if (isAce(playercard1))
+        return 'split';
+
+      if (playercard1val === 10)
+        return 'stand';
+
+      if (playercard1val === 9) {
+        if (dealercardval >= 2 && dealercardval <= 9 && dealercardval !== 7)
+          return 'split';
+        return 'stand';
+      }
+
+      if (playercard1val === 8)
+        return 'split';
+
+      if (playercard1val === 7) {
+        if (dealercardval >= 2 && dealercardval <= 7)
+          return 'split';
+        return 'hit';
+      }
+      if (playercard1val === 6) {
+        if (dealercardval >= 2 && dealercardval <= 6)
+          return 'split';
+        return 'hit';
+      }
+      if (playercard1val === 5) {
+        if (dealercardval >= 2 && dealercardval <= 9)
+          return 'double';
+        return 'hit';
+      }
+      if (playercard1val === 4) {
+        if (dealercardval >= 5 && dealercardval <= 6)
+          return 'split';
+        return 'hit';
+      }
+
+      if (dealercardval >= 2 && dealercardval <= 7)
+        return 'split';
+      return 'hit';
+    }
+
+    function getCorrectMove(cards) {
+      let dealercard = cards[0];
+      let playercard1 = cards[1];
+      let playercard2 = cards[2];
+
+      if(playercard1[0] === playercard2[0]) {
+        return getCorrectMoveSplitPair(dealercard, playercard1, playercard2);
+      }
+      if(playercard1[0] === 'a' || playercard2[0] === 'a') {
+        return getCorrectMoveSoftHand(dealercard, playercard1, playercard2);
+      }
+      return getCorrectMoveHardHand(dealercard, playercard1, playercard2);
     }
 
     function hit() {
       console.log('hitting!');
+      let cards = getCards();
+
+      let move = getCorrectMove(cards);
+
+      let feedback = 'correct!';
+      if (move !== 'hit')
+        feedback = 'INCORRECT you should ' + move;
+
+      document.getElementById('feedback').innerHTML = feedback;
+
+      if (feedback === 'correct!')
+        setTimeout(() => deal(), 1000);
     }
 
     function double() {
       console.log('double!');
+      let cards = getCards();
+
+      let move = getCorrectMove(cards);
+
+      let feedback = 'correct!';
+      if (move !== 'double')
+        feedback = 'INCORRECT you should ' + move;
+
+      document.getElementById('feedback').innerHTML = feedback;
+
+      if (feedback === 'correct!')
+        setTimeout(() => deal(), 1000);
     }
 
     function stand() {
       console.log('stand!');
+      let cards = getCards();
+
+      let move = getCorrectMove(cards);
+
+      let feedback = 'correct!';
+      if (move !== 'stand')
+        feedback = 'INCORRECT you should ' + move;
+
+      document.getElementById('feedback').innerHTML = feedback;
+
+      if (feedback === 'correct!')
+        setTimeout(() => deal(), 1000);
+    }
+
+    function split() {
+      console.log('split!');
+      let cards = getCards();
+
+      let move = getCorrectMove(cards);
+
+      let feedback = 'correct!';
+      if (move !== 'split')
+        feedback = 'INCORRECT you should ' + move;
+
+      document.getElementById('feedback').innerHTML = feedback;
+
+      if (feedback === 'correct!')
+        setTimeout(() => deal(), 1000);
     }
   </script>
+  <style>
+    body {
+      height: 100%;
+    }
+    .dealer-row {
+      height: 40%;
+    }
+
+    .player-row {
+      height: 40%;
+    }
+
+    .action-row {
+      height: 10%;
+    }
+  </style>
 </head>
-<body contextmenu="divmenu">
-  <div id="dealer_cards">
-    <img id="img1" src="cards/10_of_clubs.svg" />
+<body contextmenu="divmenu" class="container-fluid">
+  <div id="dealer_cards" class="row dealer-row">
+    <img id="img1" src="cards/10_of_clubs.svg" class="col-3 offset-2" />
+    <img id="img0" src="cards/back.jpg" class="col-3" />
   </div>
-  <h1>dealer cards</h1>
+  <h4>dealer cards</h4>
 
-  <h1>your cards</h1>
-  <div id="your_cards">
-    <img id="img2" src="cards/3_of_clubs.svg" />
-    <img id="img3" src="cards/9_of_clubs.svg" />
+  <h4>your cards</h4>
+  <div id="your_cards" class="row player-row">
+    <img id="img2" src="cards/3_of_clubs.svg" class="offset-2 col-3" />
+    <img id="img3" src="cards/9_of_clubs.svg" class="col-3" />
   </div>
-  <button onclick="deal()" accesskey="1">de<u>a</u>l!</button>
-  <button onclick="hit()" accesskey="2"><u>h</u>it!</button>
-  <button onclick="double()" accesskey="3">d<u>o</u>uble!</button>
-  <button onclick="stand()" accesskey="4"><u>s</u>tand!</button>
 
-  <h1></h1>
+  <div class="row action-row">
+    <div class="col" onclick="deal()" accesskey="1"><img width="75px" src="./actions/deal.svg"></div>
+    <div class="col" onclick="hit()" accesskey="2"><img width="75px" src="./actions/hit.svg"></div>
+    <div class="col" onclick="stand()" accesskey="4"><img width="75px" src="./actions/stand.svg"></div>
+    <div class="col" onclick="split()" accesskey="4"><img width="75px" src="./actions/split.svg"></div>
+    <div class="col" onclick="double()" accesskey="3"><img width="75px" src="./actions/double.svg"></div>
+  </div>
+
+  <!--  <button onclick="deal()" accesskey="1">de<u>a</u>l!</button>-->
+<!--  <button onclick="hit()" accesskey="2"><u>h</u>it!</button>-->
+<!--  <button onclick="double()" accesskey="3">d<u>o</u>uble!</button>-->
+<!--  <button onclick="stand()" accesskey="4"><u>s</u>tand!</button>-->
+
+  <h1 id="feedback"></h1>
 </body>
 </html>
